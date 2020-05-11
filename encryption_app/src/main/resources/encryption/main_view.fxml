@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<GridPane alignment="center" hgap="10" vgap="10" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="encryptionApp.Controller">
+    <padding><Insets bottom="10" left="25" right="25" top="25" /></padding>
+   <columnConstraints>
+      <ColumnConstraints maxWidth="0.0" minWidth="0.0" prefWidth="0.0" />
+      <ColumnConstraints maxWidth="183.0" minWidth="183.0" prefWidth="183.0" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints />
+      <RowConstraints />
+   </rowConstraints>
+   <children>
+      <Label text="Genialne narzędzie do szyfrowania" GridPane.columnIndex="1" />
+      <ButtonBar GridPane.columnIndex="1" GridPane.rowIndex="1">
+         <buttons>
+            <Button id="enc_button" alignment="CENTER" mnemonicParsing="false" onAction="#fileEncryptChoose" text="Encrypt" />
+            <Button mnemonicParsing="false" onAction="#fileDecryptChoose" text="Decrypt" />
+         </buttons>
+      </ButtonBar>
+   </children>
+
+</GridPane>
