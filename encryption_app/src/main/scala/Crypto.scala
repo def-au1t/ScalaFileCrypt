@@ -1,6 +1,6 @@
 import java.io.File
 
-package encryption{
+package encryptionApp{
 
   import javax.crypto.BadPaddingException
   import javax.crypto.Cipher
