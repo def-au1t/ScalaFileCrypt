@@ -4,18 +4,18 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="encryptionApp.Controller">
+<VBox xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
    <children>
       <MenuBar>
         <menus>
           <Menu mnemonicParsing="false" text="Plik">
             <items>
-              <MenuItem mnemonicParsing="false" text="Close" />
+              <MenuItem mnemonicParsing="false" text="Zamknij" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Pomoc">
             <items>
-              <MenuItem mnemonicParsing="false" text="About" />
+              <MenuItem mnemonicParsing="false" text="O aplikacji" />
             </items>
           </Menu>
         </menus>
@@ -26,17 +26,22 @@
                <children>
                   <VBox alignment="TOP_CENTER" prefHeight="496.0" prefWidth="266.0">
                      <children>
-                        <Label text="Niezawodne narzędzie do szyfrowania">
+                        <Label text="hasło:">
                            <VBox.margin>
                               <Insets bottom="10.0" top="10.0" />
                            </VBox.margin>
                         </Label>
-                        <Button alignment="CENTER" mnemonicParsing="false" onAction="#fileEncrypt" text="Szyfruj">
+                        <PasswordField fx:id="passwordField">
+                           <VBox.margin>
+                              <Insets bottom="10.0" left="10.0" right="10.0" />
+                           </VBox.margin>
+                        </PasswordField>
+                        <Button alignment="CENTER" mnemonicParsing="false" onAction="#buttonEncryptOnClick" text="Szyfruj">
                            <VBox.margin>
                               <Insets bottom="10.0" />
                            </VBox.margin>
                         </Button>
-                        <Button mnemonicParsing="false" onAction="#fileDecrypt" text="Deszyfruj" />
+                        <Button mnemonicParsing="false" onAction="#buttonDecryptOnClick" text="Deszyfruj" />
                      </children>
                      <opaqueInsets>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -47,12 +52,19 @@
             <VBox>
                <children>
                   <Label alignment="CENTER" minWidth="-Infinity" prefHeight="17.0" prefWidth="493.0" text="Lista plików" textAlignment="CENTER" />
-                  <ListView fx:id="filesList" prefHeight="439.0" prefWidth="465.0" />
+                  <ListView fx:id="filesList" onDragDropped="#droppedFile" onDragOver="#draggedFileOver" prefHeight="439.0" prefWidth="465.0">
+                     <VBox.margin>
+                        <Insets left="5.0" right="5.0" />
+                     </VBox.margin></ListView>
                   <ButtonBar prefHeight="40.0" prefWidth="200.0">
                     <buttons>
-                       <Button alignment="CENTER" mnemonicParsing="false" onAction="#selectFiles" text="Wybierz pliki" ButtonBar.buttonData="LEFT" />
-                        <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#cleanFiles" text="Wyczyść" ButtonBar.buttonData="RIGHT" />
+                       <Button alignment="CENTER" mnemonicParsing="false" onAction="#buttonSelectFilesOnClick" text="Wybierz pliki" ButtonBar.buttonData="LEFT" />
+                        <Button alignment="CENTER" mnemonicParsing="false" onAction="#buttonDeleteSelectedFilesOnClick" text="Usuń zaznaczone" ButtonBar.buttonData="RIGHT" />
+                        <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#buttonCleanFilesOnClick" text="Usuń wszystkie" ButtonBar.buttonData="RIGHT" />
                     </buttons>
+                     <VBox.margin>
+                        <Insets left="5.0" right="5.0" />
+                     </VBox.margin>
                   </ButtonBar>
                </children>
             </VBox>

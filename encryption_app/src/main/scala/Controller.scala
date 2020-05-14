@@ -1,92 +1,163 @@
-package encryptionApp {
+import java.io.File
+import java.net.URL
+import java.security.InvalidKeyException
 
-  import java.io.File
-  import javafx.event.ActionEvent
-  import javafx.fxml.FXML
-  import javafx.scene.control.ListView
-  import scalafx.stage.FileChooser
-  import scalafx.stage.Stage
-  import scalafx.scene.control.Alert
-  import scalafx.scene.control.Alert.AlertType
+import javafx.event.ActionEvent
+import javafx.fxml.FXML
+import javafx.scene.control.{ListView, PasswordField, SelectionMode}
+import javafx.scene.input.{DragEvent, Dragboard}
+import javax.annotation.Resources
+import scalafx.stage.FileChooser
+import scalafx.stage.Stage
+import scalafx.scene.control.{Alert, ButtonType}
+import scalafx.scene.control.Alert.AlertType
+import scalafx.scene.input.TransferMode
 
-  import scala.collection.mutable.ListBuffer
+import scala.jdk.javaapi.CollectionConverters
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
-  class Controller {
-    var selectedFiles: Seq[File] = _
+class Controller(){
 
-    @FXML
-    var filesList: ListView[File] = _
+  val fileManager = new FileManager(this)
 
-    @FXML
-    def fileEncrypt(event: ActionEvent) = {
-      if(this.selectedFiles != null) {
-        var encryptedFiles : ListBuffer[File] = ListBuffer()
-        for (file <- this.selectedFiles) {
-          var output = new File(file.toString + ".enc")
-          CryptoUtils.encrypt("sometestsometest", file, output)
-          encryptedFiles += output
-        }
-        this.selectedFiles = encryptedFiles.toList
-        this.updateFileListView()
 
-        val alert = new Alert(AlertType.Information)
-        alert.setTitle("Szyfrowanie zakończone")
-        alert.setHeaderText("Zakończono pomyślnie szyfrowanie plików")
-        alert.setContentText("Plików: " + this.selectedFiles.size)
+  @FXML
+  var filesList: ListView[File] = _
 
-        alert.showAndWait();
+  @FXML
+  var passwordField: PasswordField = _
+
+  @FXML
+  def initialize(): Unit = {
+    filesList.getSelectionModel.setSelectionMode(SelectionMode.MULTIPLE)
+  }
+
+  @FXML
+  def buttonEncryptOnClick(event: ActionEvent): Unit = {
+    var encrypted = 0
+    try {
+      encrypted = this.fileManager.encryptFiles(passwordField.getText)
+    } catch {
+      case ex: IllegalStateException =>{
+        this.showAlert(AlertType.Error,
+          "Wystąpił błąd",
+          header=ex.getMessage
+          )
+        return
+      }
+      case ex: InvalidKeyException =>{
+        this.showAlert(AlertType.Error,
+          "Nieprawidłowe hasło",
+          header=ex.getMessage
+        )
+        return
       }
     }
+    this.showAlert(AlertType.Information,
+      "Szyfrowanie zakończone",
+      "Zakończono pomyślnie szyfrowanie plików",
+      "Zaszyfrowano pomyślnie: " + encrypted + "\\" + this.fileManager.numberOfFiles)
+    this.passwordField.setText("")
+    this.updateFileListView()
+  }
 
-    @FXML
-    def fileDecrypt() = {
-      if(this.selectedFiles != null) {
-        var decryptedFiles : ListBuffer[File] = ListBuffer()
-        for (file <- this.selectedFiles) {
-          var name = file.toString.substring(0, file.toString.length - 4)
-          var output = new File(name)
-          CryptoUtils.decrypt("sometestsometest", file, output)
-          decryptedFiles += output
-        }
-
-        this.selectedFiles = decryptedFiles.toList
-        this.updateFileListView()
-
-        val alert = new Alert(AlertType.Information)
-        alert.setTitle("Odszyfrowywanie zakończone")
-        alert.setHeaderText("Zakończono pomyślnie deszyfrowanie plików")
-        alert.setContentText("Plików: " + this.selectedFiles.size)
-
-        alert.showAndWait();
+  @FXML
+  def buttonDecryptOnClick(): Unit = {
+    var decrypted = 0
+    try {
+      decrypted = this.fileManager.decryptFiles(passwordField.getText)
+    } catch{
+      case ex: IllegalStateException =>{
+        this.showAlert(AlertType.Error,
+          "Wystąpił błąd",
+          header="Nie wybrano plików"
+        )
+        return
+      }
+      case ex: InvalidKeyException =>{
+        this.showAlert(AlertType.Error,
+          "Nieprawidłowe hasło",
+          header=ex.getMessage
+        )
+        return
       }
     }
+    this.showAlert(AlertType.Information,
+      "Deszyfrowanie zakończone",
+      "Zakończono pomyślnie odszyfrowywanie plików",
+      "Zaszyfrowano pomyślnie: " + decrypted + "\\" + this.fileManager.numberOfFiles)
+    this.passwordField.setText("")
+    this.updateFileListView()
+  }
 
 
-    @FXML
-    def selectFiles(event: ActionEvent) = {
-      val fileChooser = new FileChooser()
-      fileChooser.setTitle("Wybierz pliki")
-      val stage = new Stage()
-      val files = fileChooser.showOpenMultipleDialog(stage)
-      if (files != null){
-        this.selectedFiles = files
-        this.updateFileListView()
+  @FXML
+  def buttonSelectFilesOnClick(event: ActionEvent): Unit = {
+    val fileChooser = new FileChooser()
+    fileChooser.setTitle("Wybierz pliki")
+    val stage = new Stage()
+    val files = fileChooser.showOpenMultipleDialog(stage)
+    if (files != null){
+      this.addFiles(files)
+    }
+  }
+
+  @FXML
+  def buttonDeleteSelectedFilesOnClick(event: ActionEvent): Unit = {
+    val selectedFiles : ArrayBuffer[File] = ArrayBuffer.empty
+    val it = this.filesList.getSelectionModel.getSelectedItems.iterator()
+    it.forEachRemaining(selectedFiles.addOne)
+    this.removeFiles(selectedFiles.toSeq)
+
+  }
+
+  @FXML
+  def buttonCleanFilesOnClick(event: ActionEvent): Unit = {
+    this.fileManager.clearFiles()
+    this.updateFileListView()
+  }
+
+  def updateFileListView(): Unit = {
+    this.filesList.getItems.clear()
+    if (this.fileManager.files != null) {
+      for (file <- this.fileManager.files) {
+        this.filesList.getItems.add(file)
       }
     }
+  }
 
-    def cleanFiles(event: ActionEvent) = {
-      this.selectedFiles = null
-      this.updateFileListView()
+  def draggedFileOver(event: DragEvent): Unit = {
+    if (event.getDragboard.hasFiles) {
+      event.acceptTransferModes(TransferMode.Copy)
     }
+    event.consume()
+  }
 
-    def updateFileListView() = {
-      this.filesList.getItems.clear()
-      if (this.selectedFiles != null) {
-        for (file <- this.selectedFiles) {
-          this.filesList.getItems.add(file)
-        }
-      }
+  def droppedFile(event: DragEvent): Unit = {
+    val db : Dragboard = event.getDragboard
+    if(db.hasFiles){
+      val droppedFiles = db.getFiles
+      this.addFiles(CollectionConverters.asScala(droppedFiles).toSeq)
     }
+    event.setDropCompleted(true)
+  }
+
+  def showAlert(alertType: AlertType, title : String, header : String = null, content: String = null): Option[ButtonType] = {
+    val alert = new Alert(alertType)
+    alert.setTitle(title)
+    alert.setHeaderText(header)
+    alert.setContentText(content)
+    alert.showAndWait()
+  }
+
+  def addFiles(files: Seq[File]): Unit = {
+    this.fileManager.addFiles(files)
+    this.updateFileListView()
+  }
+
+  def removeFiles(files: Seq[File]): Unit = {
+    this.fileManager.removeFiles(files)
+    this.updateFileListView()
   }
 
 }
