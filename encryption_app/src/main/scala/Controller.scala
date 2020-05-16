@@ -6,7 +6,7 @@ import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.control.{ListView, PasswordField, SelectionMode}
 import javafx.scene.input.{DragEvent, Dragboard}
-import javax.annotation.Resources
+//import javax.annotation.Resources
 import scalafx.stage.FileChooser
 import scalafx.stage.Stage
 import scalafx.scene.control.{Alert, ButtonType}
@@ -90,6 +90,47 @@ class Controller(){
     this.updateFileListView()
   }
 
+  @FXML
+  def buttonCompressFilesOnClick(event: ActionEvent): Unit = {
+    var compressed = 0
+    try {
+      compressed = this.fileManager.compressFiles()
+    } catch {
+      case ex: IllegalStateException =>{
+        this.showAlert(AlertType.Error,
+          "Wystąpił błąd",
+          header=ex.getMessage
+        )
+        return
+      }
+    }
+    this.showAlert(AlertType.Information,
+      "Kompresja zakończona",
+      "Zakończono pomyślnie kompresowanie plików",
+      "Skompresowano pomyślnie: " + compressed + "\\" + this.fileManager.numberOfFiles)
+    this.updateFileListView()
+  }
+
+  @FXML
+  def buttonUnpackFilesOnClick(event: ActionEvent): Unit = {
+    var unpacked = 0
+    try {
+      unpacked = this.fileManager.unpackFiles()
+    } catch {
+      case ex: IllegalStateException =>{
+        this.showAlert(AlertType.Error,
+          "Wystąpił błąd",
+          header=ex.getMessage
+        )
+        return
+      }
+    }
+    this.showAlert(AlertType.Information,
+      "Wypakowywanie zakończone",
+      "Zakończono pomyślnie wypakowywanie plików",
+      "Wypakowano pomyślnie: " + unpacked + "\\" + this.fileManager.numberOfFiles)
+    this.updateFileListView()
+  }
 
   @FXML
   def buttonSelectFilesOnClick(event: ActionEvent): Unit = {
