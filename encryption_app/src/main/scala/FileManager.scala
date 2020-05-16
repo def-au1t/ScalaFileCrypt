@@ -1,4 +1,4 @@
-import java.nio.file.{Files, NoSuchFileException, Path, Paths}
+import java.nio.file.{Files, NoSuchFileException, Path, Paths, StandardCopyOption}
 import java.security.InvalidKeyException
 import java.io.{BufferedInputStream, BufferedReader, File, FileInputStream, FileOutputStream, InputStream}
 
@@ -54,10 +54,13 @@ class FileManager(controller: Controller) {
     return numberDecrypted
   }
 
-  def compressFiles(): Int = {
+  def compressFiles(f: File): Int = {
 
-    val comp = new ZipOutputStream(new FileOutputStream("temp.zip"))
+    val comp = new ZipOutputStream(new FileOutputStream(f.getPath))
     var compressed = 0
+    if (this.files.isEmpty){
+      throw new IllegalStateException("Nie wybrano plików.")
+    }
     for (file <- this.files) {
       comp.putNextEntry(new ZipEntry(file.getName))
       val input = new BufferedInputStream(new FileInputStream(file.toString))
@@ -81,9 +84,12 @@ class FileManager(controller: Controller) {
     }
   }
 
-  def unpackFiles(): Int = {
+  def unpackFiles(f: File): Int = {
     var unpacked = 0
-    val outputPath = Paths.get("tmp")
+    val outputPath = f.toPath
+    if (this.files.isEmpty){
+      throw new IllegalStateException("Nie wybrano plików.")
+    }
     for(file <- files) {
       using(new ZipFile(file)) { packedFile =>
         for (f <- packedFile.entries.asScala) {
@@ -92,7 +98,7 @@ class FileManager(controller: Controller) {
             Files.createDirectories(path)
           } else {
             Files.createDirectories(path.getParent)
-            Files.copy(packedFile.getInputStream(f), path)
+            Files.copy(packedFile.getInputStream(f), path, StandardCopyOption.REPLACE_EXISTING)
           }
         }
       }
