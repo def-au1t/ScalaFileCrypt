@@ -34,6 +34,19 @@ class Controller(){
   }
 
   @FXML
+  def menuFileCloseOnClick(event: ActionEvent): Unit = {
+    System.exit(0)
+  }
+
+  @FXML
+  def menuHelpAboutOnClick(event: ActionEvent): Unit = {
+    this.showAlert(AlertType.Information,
+      "O Aplikacji ",
+      "Aplikacja powstała w ramach projektu z przedmiotu:\nProgramowanie w języku Scala",
+      "Wersja: 0.1\n\nAutorzy: \n- Kamil Koczera\n- Jacek Nitychoruk")
+  }
+
+  @FXML
   def buttonEncryptOnClick(event: ActionEvent): Unit = {
     var encrypted = 0
     try {

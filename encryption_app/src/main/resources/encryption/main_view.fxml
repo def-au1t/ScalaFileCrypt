@@ -10,12 +10,12 @@
         <menus>
           <Menu mnemonicParsing="false" text="Plik">
             <items>
-              <MenuItem mnemonicParsing="false" text="Zamknij" />
+              <MenuItem mnemonicParsing="false" onAction="#menuFileCloseOnClick" text="Zamknij" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Pomoc">
             <items>
-              <MenuItem mnemonicParsing="false" text="O aplikacji" />
+              <MenuItem mnemonicParsing="false" onAction="#menuHelpAboutOnClick" text="O aplikacji" />
             </items>
           </Menu>
         </menus>
