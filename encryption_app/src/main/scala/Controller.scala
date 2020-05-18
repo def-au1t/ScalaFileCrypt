@@ -174,6 +174,7 @@ class Controller(){
         return
       }
     }
+    this.passwordField.setText("")
     this.updateFileListView()
   }
 
