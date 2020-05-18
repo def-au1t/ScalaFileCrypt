@@ -7,10 +7,21 @@ import java.util.zip.{ZipEntry, ZipException, ZipFile, ZipInputStream, ZipOutput
 import java.io.{FileOutputStream, InputStream}
 
 import sun.security.util.Password
+
 import scala.jdk.CollectionConverters._
+import java.io.BufferedInputStream
+import java.io.DataInputStream
+import java.io.FileInputStream
+import java.io.IOException
+import util.control.Breaks._
+
+import scalafx.scene.control.Alert.AlertType
+
 
 class FileManager(controller: Controller) {
   var files = Vector.empty[File]
+  var allAreEncrypted = false
+
 
 
   def numberOfFiles(): Int = files.size
@@ -42,25 +53,39 @@ class FileManager(controller: Controller) {
   }
 
   def decryptFiles(password: String, selectedDirectory: File): Int = {
-//    if (password.length < 3){
-//      throw new InvalidKeyException("Hasło musi mieć przynajmniej 3 znaki")
-//    }
+
     var numberDecrypted = 0
-//    if (this.files.isEmpty) {
-//      throw new IllegalStateException("Nie wybrano plików")
-//    }
     var decryptedFiles = ListBuffer.empty[File]
     for (file <- this.files) {
-      var name = selectedDirectory.toString + "\\" + file.getName.substring(0, file.getName.length - 4)
-      var output = new File(name)
-      CryptoUtils.decrypt(password, file, output)
-      if(this.isZipFile(output)) {
-        this.unpackFiles(output, selectedDirectory, decryptedFiles)
+      breakable {
+        var name = selectedDirectory.toString + "\\" + file.getName.substring(0, file.getName.length - 4);
+        var output = new File(name)
+        try {
+          CryptoUtils.decrypt(password, file, output)
+        }
+        catch {
+          case ex: InvalidKeyException => {
+            this.controller.showAlert(AlertType.Error,
+              "Nieprawidłowe hasło",
+              header = ex.getMessage
+            )
+            break
+          }
+          case ex: Exception => {
+            this.controller.showAlert(AlertType.Error,
+              "Nieoczekiwany błąd",
+              header = ex.getMessage
+            )
+          }
+        }
+        if (this.isZipFile(output)) {
+          this.unpackFiles(output, selectedDirectory, decryptedFiles)
+        }
+        else {
+          decryptedFiles += output
+        }
+        numberDecrypted += 1
       }
-      else {
-        decryptedFiles += output
-      }
-      numberDecrypted += 1
     }
     this.files = decryptedFiles.toVector
     return numberDecrypted
@@ -98,10 +123,6 @@ class FileManager(controller: Controller) {
     }
   }
 
-  import java.io.BufferedInputStream
-  import java.io.DataInputStream
-  import java.io.FileInputStream
-  import java.io.IOException
 
   @throws[IOException]
   def isZipFile(file: File): Boolean = {
@@ -139,9 +160,37 @@ class FileManager(controller: Controller) {
     unpacked
   }
 
-  def addFiles(files: Seq[File]): Unit = this.files ++= files
+  def checkIfAllEncrypted(): Boolean = {
+    var result = true
+    if (this.files.isEmpty) return false
+    for (file <- this.files){
+      if(file.getName.length < 4 || file.getName.substring(file.getName.length-4, file.getName.length) != ".enc")
+        result = false
+    }
+    if (result != this.allAreEncrypted){
+      this.allAreEncrypted = result;
+    }
+    return result
+  }
 
-  def removeFiles(files: Seq[File]): Unit = this.files = this.files.diff(files)
 
-  def clearFiles(): Unit = this.files = Vector.empty[File]
+  def addFiles(files: Seq[File]): Unit = {
+    this.files ++= files
+    this.onFilesChange()
+  }
+
+  def removeFiles(files: Seq[File]): Unit = {
+    this.files = this.files.diff(files)
+    this.onFilesChange()
+  }
+
+  def clearFiles(): Unit = {
+    this.files = Vector.empty[File]
+    this.onFilesChange()
+  }
+
+  def onFilesChange() = {
+    this.controller.setButtonStatus()
+    this.controller.updateFileListView()
+  }
 }

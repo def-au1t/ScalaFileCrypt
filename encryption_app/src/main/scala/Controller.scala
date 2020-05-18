@@ -4,7 +4,7 @@ import java.security.InvalidKeyException
 
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
-import javafx.scene.control.{ListView, PasswordField, SelectionMode}
+import javafx.scene.control.{Button, ListView, PasswordField, SelectionMode}
 import javafx.scene.input.{DragEvent, Dragboard}
 import javafx.stage.DirectoryChooser
 //import javax.annotation.Resources
@@ -27,6 +27,13 @@ class Controller(){
 
   @FXML
   var passwordField: PasswordField = _
+
+  @FXML
+  var buttonDecrypt: Button = _
+  @FXML
+  var buttonEncrypt: Button = _
+  @FXML
+  var buttonCompressAndEncrypt: Button = _
 
   @FXML
   def initialize(): Unit = {
@@ -79,7 +86,7 @@ class Controller(){
       "Zakończono pomyślnie szyfrowanie plików",
       "Zaszyfrowano pomyślnie: " + encrypted + "\\" + this.fileManager.numberOfFiles)
     this.passwordField.setText("")
-    this.updateFileListView()
+    this.fileManager.onFilesChange
   }
 
   @FXML
@@ -99,34 +106,42 @@ class Controller(){
       val selectedDirectory = directoryChooser.showDialog(stage)
       if (selectedDirectory != null) {
         decrypted = this.fileManager.decryptFiles(passwordField.getText, selectedDirectory)
-        this.showAlert(AlertType.Information,
-          "Deszyfrowanie zakończone",
-          "Zakończono pomyślnie odszyfrowywanie plików",
-          "Odszyfrowano pomyślnie: " + decrypted + "\\" + allFiles)
+        if (decrypted == allFiles){
+          this.showAlert(AlertType.Information,
+            "Deszyfrowanie zakończone",
+            "Zakończono pomyślnie odszyfrowywanie plików",
+            "Odszyfrowano wszystkie " + decrypted + " plików.")
+        }
+        else{
+          this.showAlert(AlertType.Information,
+            "Deszyfrowanie zakończone",
+            "Wystąpiły błędy podczas odszyfrowywania plików",
+            "Odszyfrowano " + decrypted + "\\" + allFiles)
+        }
+
         this.passwordField.setText("")
-        this.updateFileListView()
+        this.fileManager.onFilesChange
       }
     } catch{
-      case ex: IllegalStateException =>{
+      case ex: IllegalStateException => {
         this.showAlert(AlertType.Error,
           "Wystąpił błąd",
-          header="Nie wybrano plików"
+          header=ex.getMessage
         )
         return
       }
-      case ex: InvalidKeyException =>{
+      case ex: InvalidKeyException => {
         this.showAlert(AlertType.Error,
-          "Nieprawidłowe hasło",
+          "Hasło nie spełnia wymagań",
           header=ex.getMessage
         )
         return
       }
       case ex: Exception => {
         this.showAlert(AlertType.Error,
-        "Nieoczekiwany błąd",
-          header=ex.getMessage
+          "Nieoczekiwany błąd",
+          header = ex.getMessage
         )
-        return
       }
     }
 
@@ -175,7 +190,7 @@ class Controller(){
       }
     }
     this.passwordField.setText("")
-    this.updateFileListView()
+    this.fileManager.onFilesChange
   }
 
 //  @FXML
@@ -240,12 +255,11 @@ class Controller(){
   @FXML
   def buttonCleanFilesOnClick(event: ActionEvent): Unit = {
     this.fileManager.clearFiles()
-    this.updateFileListView()
   }
 
   def updateFileListView(): Unit = {
     this.filesList.getItems.clear()
-    if (this.fileManager.files != null) {
+    if (this.fileManager.files.nonEmpty) {
       for (file <- this.fileManager.files) {
         this.filesList.getItems.add(file)
       }
@@ -278,12 +292,21 @@ class Controller(){
 
   def addFiles(files: Seq[File]): Unit = {
     this.fileManager.addFiles(files)
-    this.updateFileListView()
   }
 
   def removeFiles(files: Seq[File]): Unit = {
     this.fileManager.removeFiles(files)
-    this.updateFileListView()
+  }
+
+  def setButtonDecryptStatus(status: Boolean) = {
+    this.buttonDecrypt.setDisable(!status)
+  }
+
+  def setButtonStatus() = {
+    this.buttonDecrypt.setDisable(! fileManager.checkIfAllEncrypted())
+    val res = this.fileManager.files.isEmpty
+    this.buttonEncrypt.setDisable(res)
+    this.buttonCompressAndEncrypt.setDisable(this.fileManager.files.isEmpty)
   }
 
 }
