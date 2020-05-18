@@ -37,12 +37,14 @@ object CryptoUtils {
       val inputBytes = new Array[Byte](inputFile.length.asInstanceOf[Int])
       inputStream.read(inputBytes)
       val outputBytes = cipher.doFinal(inputBytes)
-      val outputStream = new FileOutputStream(outputFile)
+      val outputStream = new FileOutputStream(outputFile, false)
       outputStream.write(outputBytes)
       inputStream.close()
       outputStream.close()
     } catch {
-      case ex@(_: NoSuchPaddingException | _: NoSuchAlgorithmException | _: BadPaddingException | _: IllegalBlockSizeException | _: IOException) =>
+      case e: BadPaddingException =>
+        throw new InvalidKeyException("Nieprawidłowe hasło", e)
+      case ex@(_: NoSuchPaddingException | _: NoSuchAlgorithmException | _: IllegalBlockSizeException | _: IOException) =>
         throw new Exception("Error encrypting/decrypting file", ex)
     }
   }

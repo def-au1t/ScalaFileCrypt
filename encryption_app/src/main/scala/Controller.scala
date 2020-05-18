@@ -34,6 +34,19 @@ class Controller(){
   }
 
   @FXML
+  def menuFileCloseOnClick(event: ActionEvent): Unit = {
+    System.exit(0)
+  }
+
+  @FXML
+  def menuHelpAboutOnClick(event: ActionEvent): Unit = {
+    this.showAlert(AlertType.Information,
+      "O Aplikacji ",
+      "Aplikacja powstała w ramach projektu z przedmiotu:\nProgramowanie w języku Scala",
+      "Wersja: 0.1\n\nAutorzy: \n- Kamil Koczera\n- Jacek Nitychoruk")
+  }
+
+  @FXML
   def buttonEncryptOnClick(event: ActionEvent): Unit = {
     var encrypted = 0
     try {
@@ -53,6 +66,13 @@ class Controller(){
         )
         return
       }
+      case ex: Exception => {
+        this.showAlert(AlertType.Error,
+          "Nieoczekiwany błąd",
+          header=ex.getMessage
+        )
+        return
+      }
     }
     this.showAlert(AlertType.Information,
       "Szyfrowanie zakończone",
@@ -65,8 +85,27 @@ class Controller(){
   @FXML
   def buttonDecryptOnClick(): Unit = {
     var decrypted = 0
+    val allFiles = this.fileManager.numberOfFiles()
     try {
-      decrypted = this.fileManager.decryptFiles(passwordField.getText)
+      if(allFiles == 0) {
+        throw new IllegalStateException("Nie wybrano plików")
+      }
+      if(passwordField.getText.length < 3) {
+        throw new InvalidKeyException("Hasło musi mieć przynajmniej 3 znaki")
+      }
+      val stage = new Stage()
+      val directoryChooser = new DirectoryChooser()
+      directoryChooser.setTitle("Wybierz miejsce do zapisu odszyfrowanych plików")
+      val selectedDirectory = directoryChooser.showDialog(stage)
+      if (selectedDirectory != null) {
+        decrypted = this.fileManager.decryptFiles(passwordField.getText, selectedDirectory)
+        this.showAlert(AlertType.Information,
+          "Deszyfrowanie zakończone",
+          "Zakończono pomyślnie odszyfrowywanie plików",
+          "Odszyfrowano pomyślnie: " + decrypted + "\\" + allFiles)
+        this.passwordField.setText("")
+        this.updateFileListView()
+      }
     } catch{
       case ex: IllegalStateException =>{
         this.showAlert(AlertType.Error,
@@ -82,33 +121,43 @@ class Controller(){
         )
         return
       }
+      case ex: Exception => {
+        this.showAlert(AlertType.Error,
+        "Nieoczekiwany błąd",
+          header=ex.getMessage
+        )
+        return
+      }
     }
-    this.showAlert(AlertType.Information,
-      "Deszyfrowanie zakończone",
-      "Zakończono pomyślnie odszyfrowywanie plików",
-      "Zaszyfrowano pomyślnie: " + decrypted + "\\" + this.fileManager.numberOfFiles)
-    this.passwordField.setText("")
-    this.updateFileListView()
+
   }
 
   @FXML
   def buttonCompressFilesOnClick(event: ActionEvent): Unit = {
     var compressed = 0
+    val allFiles = this.fileManager.numberOfFiles()
     try {
+      if(allFiles == 0) {
+        throw new IllegalStateException("Nie wybrano plików")
+      }
+      if(passwordField.getText.length < 3) {
+        throw new InvalidKeyException("Hasło musi mieć przynajmniej 3 znaki")
+      }
       val stage = new Stage()
       val fileChooser = new FileChooser()
 
-      val extFilter = new FileChooser.ExtensionFilter("ZIP files (*.zip)", "*.zip")
+      val extFilter = new FileChooser.ExtensionFilter("ENC files (*.enc)", "*.enc")
       fileChooser.getExtensionFilters.add(extFilter)
 
       val file = fileChooser.showSaveDialog(stage)
-      compressed = this.fileManager.compressFiles(file)
+      if(file != null) {
+        compressed = this.fileManager.compressFiles(file, passwordField.getText())
 
-      this.showAlert(AlertType.Information,
-        "Kompresja zakończona",
-        "Zakończono pomyślnie kompresowanie plików",
-        "Skompresowano pomyślnie: " + compressed + "\\" + this.fileManager.numberOfFiles)
-
+        this.showAlert(AlertType.Information,
+          "Kompresja zakończona",
+          "Zakończono pomyślnie kompresowanie plików",
+          "Skompresowano pomyślnie: " + compressed + "\\" + allFiles)
+      }
     } catch {
       case ex: IllegalStateException =>{
         this.showAlert(AlertType.Error,
@@ -117,37 +166,55 @@ class Controller(){
         )
         return
       }
-    }
-    this.updateFileListView()
-  }
-
-  @FXML
-  def buttonUnpackFilesOnClick(event: ActionEvent): Unit = {
-    var unpacked = 0
-    try {
-      val stage = new Stage()
-      val directoryChooser = new DirectoryChooser()
-      directoryChooser.setTitle("Wybierz miejsce do zapisu wypakowanych plików")
-      val selectedDirectory = directoryChooser.showDialog(stage)
-      if (selectedDirectory != null){
-        unpacked = this.fileManager.unpackFiles(selectedDirectory)
-        this.showAlert(AlertType.Information,
-          "Wypakowywanie zakończone",
-          "Zakończono pomyślnie wypakowywanie plików",
-          "Wypakowano pomyślnie: " + unpacked + "\\" + this.fileManager.numberOfFiles)
-
-      }
-    } catch {
-      case ex: IllegalStateException =>{
+      case ex: Exception => {
         this.showAlert(AlertType.Error,
-          "Wystąpił błąd",
-          header="Nie wybrano plików"
+          "Nieoczekiwany błąd",
+          header=ex.getMessage
         )
         return
       }
     }
     this.updateFileListView()
   }
+
+//  @FXML
+//  def buttonUnpackFilesOnClick(event: ActionEvent): Unit = {
+//    var unpacked = 0
+//    val allFiles = this.fileManager.numberOfFiles()
+//    try {
+//      if(allFiles == 0) {
+//        throw new IllegalStateException("Nie wybrano plików")
+//      }
+//      val stage = new Stage()
+//      val directoryChooser = new DirectoryChooser()
+//      directoryChooser.setTitle("Wybierz miejsce do zapisu wypakowanych plików")
+//      val selectedDirectory = directoryChooser.showDialog(stage)
+//      if (selectedDirectory != null){
+//        unpacked = this.fileManager.unpackFiles(selectedDirectory)
+//        this.showAlert(AlertType.Information,
+//          "Wypakowywanie zakończone",
+//          "Zakończono pomyślnie wypakowywanie plików",
+//          "Wypakowano pomyślnie: " + unpacked + "\\" + allFiles)
+//
+//      }
+//    } catch {
+//      case ex: IllegalStateException =>{
+//        this.showAlert(AlertType.Error,
+//          "Wystąpił błąd",
+//          header="Nie wybrano plików"
+//        )
+//        return
+//      }
+//      case ex: Exception => {
+//        this.showAlert(AlertType.Error,
+//          "Nieoczekiwany błąd",
+//          header=ex.getMessage
+//        )
+//        return
+//      }
+//    }
+//    this.updateFileListView()
+//  }
 
   @FXML
   def buttonSelectFilesOnClick(event: ActionEvent): Unit = {
