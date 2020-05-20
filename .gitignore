@@ -4,3 +4,5 @@ target/
 project/
 .idea/
 lib/
+out/artifacts/encryption_app_jar/encryption_app.jar
+encryption_app/src/main/scala/META-INF/MANIFEST.MF
