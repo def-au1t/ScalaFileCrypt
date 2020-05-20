@@ -10,12 +10,12 @@
         <menus>
           <Menu mnemonicParsing="false" text="Plik">
             <items>
-              <MenuItem mnemonicParsing="false" text="Zamknij" />
+              <MenuItem mnemonicParsing="false" onAction="#menuFileCloseOnClick" text="Zamknij" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Pomoc">
             <items>
-              <MenuItem mnemonicParsing="false" text="O aplikacji" />
+              <MenuItem mnemonicParsing="false" onAction="#menuHelpAboutOnClick" text="O aplikacji" />
             </items>
           </Menu>
         </menus>
@@ -36,12 +36,23 @@
                               <Insets bottom="10.0" left="10.0" right="10.0" />
                            </VBox.margin>
                         </PasswordField>
-                        <Button alignment="CENTER" mnemonicParsing="false" onAction="#buttonEncryptOnClick" text="Szyfruj">
+                         <Button fx:id="buttonDecrypt" disable="true" mnemonicParsing="false" onAction="#buttonDecryptOnClick" text="Deszyfruj">
+                         <VBox.margin>
+                             <Insets bottom="10.0" />
+                         </VBox.margin>
+                        </Button>
+                        <Separator prefWidth="200.0">
+                           <VBox.margin>
+                              <Insets bottom="10.0" left="20.0" right="20.0" />
+                           </VBox.margin>
+                        </Separator>
+                        <Button fx:id="buttonEncrypt" alignment="CENTER" disable="true" mnemonicParsing="false" onAction="#buttonEncryptOnClick" text="Szyfruj">
                            <VBox.margin>
                               <Insets bottom="10.0" />
                            </VBox.margin>
                         </Button>
-                        <Button mnemonicParsing="false" onAction="#buttonDecryptOnClick" text="Deszyfruj" />
+
+                        <Button fx:id="buttonCompressAndEncrypt" disable="true" mnemonicParsing="false" onAction="#buttonCompressFilesOnClick" text="Kompresuj i szyfruj" />
                      </children>
                      <opaqueInsets>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -61,8 +72,7 @@
                        <Button alignment="CENTER" mnemonicParsing="false" onAction="#buttonSelectFilesOnClick" text="Wybierz pliki" ButtonBar.buttonData="LEFT" />
                         <Button alignment="CENTER" mnemonicParsing="false" onAction="#buttonDeleteSelectedFilesOnClick" text="Usuń zaznaczone" ButtonBar.buttonData="RIGHT" />
                         <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#buttonCleanFilesOnClick" text="Usuń wszystkie" ButtonBar.buttonData="RIGHT" />
-                        <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#buttonCompressFilesOnClick" text="Skompresuj" ButtonBar.buttonData="RIGHT" />
-                        <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#buttonUnpackFilesOnClick" text="Wypakuj" ButtonBar.buttonData="RIGHT" />
+<!--                        <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#buttonUnpackFilesOnClick" text="Wypakuj" ButtonBar.buttonData="RIGHT" />-->
                     </buttons>
                      <VBox.margin>
                         <Insets left="5.0" right="5.0" />
