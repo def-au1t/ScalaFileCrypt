@@ -21,6 +21,7 @@ import scalafx.scene.control.Alert.AlertType
 class FileManager(controller: Controller) {
   var files = Vector.empty[File]
   var allAreEncrypted = false
+  var EncryptionAlgorithm = "AES"
 
 
 
@@ -41,7 +42,7 @@ class FileManager(controller: Controller) {
       if(compressed != -1) {
         output = new File(file.toString)
       }
-      CryptoUtils.encrypt(password, file, output)
+      CryptoUtils.encrypt(password, file, output, this.EncryptionAlgorithm)
       encryptedFiles += output
       numberEncrypted += 1
     }
@@ -61,7 +62,7 @@ class FileManager(controller: Controller) {
         var name = selectedDirectory.toString + "\\" + file.getName.substring(0, file.getName.length - 4);
         var output = new File(name)
         try {
-          CryptoUtils.decrypt(password, file, output)
+          CryptoUtils.decrypt(password, file, output, this.EncryptionAlgorithm)
         }
         catch {
           case ex: InvalidKeyException => {

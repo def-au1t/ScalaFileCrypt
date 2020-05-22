@@ -2,9 +2,10 @@ import java.io.File
 import java.net.URL
 import java.security.InvalidKeyException
 
+import javafx.beans.value.ChangeListener
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
-import javafx.scene.control.{Button, ListView, PasswordField, SelectionMode}
+import javafx.scene.control.{Button, ChoiceBox, ListView, PasswordField, SelectionMode}
 import javafx.scene.input.{DragEvent, Dragboard}
 import javafx.stage.DirectoryChooser
 //import javax.annotation.Resources
@@ -34,6 +35,8 @@ class Controller(){
   var buttonEncrypt: Button = _
   @FXML
   var buttonCompressAndEncrypt: Button = _
+  @FXML
+  var choiceAlgorithm: ChoiceBox[String] = _
 
   @FXML
   def initialize(): Unit = {
@@ -190,7 +193,7 @@ class Controller(){
       }
     }
     this.passwordField.setText("")
-    this.fileManager.onFilesChange
+    this.fileManager.onFilesChange()
   }
 
 //  @FXML
@@ -257,6 +260,18 @@ class Controller(){
     this.fileManager.clearFiles()
   }
 
+  @FXML
+  def choiceAlgorithmOnChange(event: ActionEvent): Unit = {
+    val algorithm = this.getAlgorithmString(this.choiceAlgorithm.getValue)
+    this.fileManager.EncryptionAlgorithm = algorithm
+  }
+
+  def getAlgorithmString(input: String): String = input match {
+    case "AES" => "AES"
+    case "Blowfish" => "Blowfish"
+    case _ => "AES"
+  }
+
   def updateFileListView(): Unit = {
     this.filesList.getItems.clear()
     if (this.fileManager.files.nonEmpty) {
@@ -298,11 +313,11 @@ class Controller(){
     this.fileManager.removeFiles(files)
   }
 
-  def setButtonDecryptStatus(status: Boolean) = {
+  def setButtonDecryptStatus(status: Boolean): Unit = {
     this.buttonDecrypt.setDisable(!status)
   }
 
-  def setButtonStatus() = {
+  def setButtonStatus(): Unit = {
     this.buttonDecrypt.setDisable(! fileManager.checkIfAllEncrypted())
     val res = this.fileManager.files.isEmpty
     this.buttonEncrypt.setDisable(res)

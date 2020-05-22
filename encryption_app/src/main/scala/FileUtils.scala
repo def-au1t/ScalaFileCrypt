@@ -12,26 +12,34 @@ import java.security.{InvalidKeyException, Key, MessageDigest, NoSuchAlgorithmEx
 import java.nio.charset.StandardCharsets
 
 object CryptoUtils {
-  private val ALGORITHM = "AES"
-  private val TRANSFORMATION = "AES"
+
+
+  def getSecretKeyAlgorithm(encryption: String) : String =  encryption match {
+      case "AES" => "AES"
+      case "Blowfish" => "Blowfish"
+      case _ => "AES"
+    }
 
   @throws[CryptoException]
-  def encrypt(password: String, inputFile: File, outputFile: File): Unit = {
-    doCrypto(Cipher.ENCRYPT_MODE, password, inputFile, outputFile)
+  def encrypt(password: String, inputFile: File, outputFile: File, algorithm: String): Unit = {
+    val secretKeyAlgorithm = getSecretKeyAlgorithm(algorithm)
+    doCrypto(Cipher.ENCRYPT_MODE, password, inputFile, outputFile, algorithm, secretKeyAlgorithm)
   }
 
   @throws[CryptoException]
-  def decrypt(password: String, inputFile: File, outputFile: File): Unit = {
-    doCrypto(Cipher.DECRYPT_MODE, password, inputFile, outputFile)
+  def decrypt(password: String, inputFile: File, outputFile: File, algorithm: String): Unit = {
+    val secretKeyAlgorithm = getSecretKeyAlgorithm(algorithm)
+    doCrypto(Cipher.DECRYPT_MODE, password, inputFile, outputFile, algorithm, secretKeyAlgorithm)
   }
 
   @throws[CryptoException]
-  private def doCrypto(cipherMode: Int, password: String, inputFile: File, outputFile: File): Unit = {
+  private def doCrypto(cipherMode: Int, password: String, inputFile: File, outputFile: File, algorithm: String,
+                      secretKeyAlgorithm: String): Unit = {
     try {
       val digest = MessageDigest.getInstance("SHA-256")
       val encodedHash = digest.digest(password.getBytes(StandardCharsets.UTF_8)).slice(0, 16)
-      val secretKey = new SecretKeySpec(encodedHash, ALGORITHM)
-      val cipher = Cipher.getInstance(TRANSFORMATION)
+      val secretKey = new SecretKeySpec(encodedHash, algorithm)
+      val cipher = Cipher.getInstance(secretKeyAlgorithm)
       cipher.init(cipherMode, secretKey)
       val inputStream = new FileInputStream(inputFile)
       val inputBytes = new Array[Byte](inputFile.length.asInstanceOf[Int])
@@ -43,7 +51,7 @@ object CryptoUtils {
       outputStream.close()
     } catch {
       case e: BadPaddingException =>
-        throw new InvalidKeyException("Nieprawidłowe hasło", e)
+        throw new InvalidKeyException("Nieprawidłowe hasło lub zły algorytm szyfrowania", e)
       case ex@(_: NoSuchPaddingException | _: NoSuchAlgorithmException | _: IllegalBlockSizeException | _: IOException) =>
         throw new Exception("Error encrypting/decrypting file", ex)
     }
