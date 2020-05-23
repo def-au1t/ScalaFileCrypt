@@ -38,6 +38,7 @@ class FileManager(controller: Controller) {
     }
     var encryptedFiles = ListBuffer.empty[File]
     for (file <- this.files) {
+      if(!file.canRead) throw new Exception("Nie można odczytać pliku " + file.getAbsolutePath)
       var output = new File(file.toString + ".enc")
       if(compressed != -1) {
         output = new File(file.toString)
@@ -62,6 +63,7 @@ class FileManager(controller: Controller) {
         var name = selectedDirectory.toString + "\\" + file.getName.substring(0, file.getName.length - 4);
         var output = new File(name)
         try {
+          if(!file.canRead) throw new Exception("Nie można odczytać pliku " + file.getAbsolutePath)
           CryptoUtils.decrypt(password, file, output, this.EncryptionAlgorithm)
         }
         catch {
@@ -79,13 +81,15 @@ class FileManager(controller: Controller) {
             )
           }
         }
-        if (this.isZipFile(output)) {
-          this.unpackFiles(output, selectedDirectory, decryptedFiles)
-        }
-        else {
-          decryptedFiles += output
-        }
-        numberDecrypted += 1
+        if(output.canRead) {
+          if (this.isZipFile(output)) {
+            this.unpackFiles(output, selectedDirectory, decryptedFiles)
+          }
+          else {
+            decryptedFiles += output
+          }
+          numberDecrypted += 1
+       }
       }
     }
     this.files = decryptedFiles.toVector
@@ -96,10 +100,8 @@ class FileManager(controller: Controller) {
 
     val comp = new ZipOutputStream(new FileOutputStream(f.getPath))
     var compressed = 0
-//    if (this.files.isEmpty){
-//      throw new IllegalStateException("Nie wybrano plików.")
-//    }
     for (file <- this.files) {
+      if(!file.canRead) throw new Exception("Nie można odczytać pliku " + file.getAbsolutePath)
       comp.putNextEntry(new ZipEntry(file.getName))
       val input = new BufferedInputStream(new FileInputStream(file.toString))
       val bytes = input.readAllBytes()
@@ -128,7 +130,6 @@ class FileManager(controller: Controller) {
   @throws[IOException]
   def isZipFile(file: File): Boolean = {
     if (file.isDirectory) return false
-    if (!file.canRead) throw new IOException("Cannot read file " + file.getAbsolutePath)
     if (file.length < 4) return false
     val in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))
     val test = in.readInt
@@ -139,9 +140,6 @@ class FileManager(controller: Controller) {
   def unpackFiles(file: File, dir: File, decryptedFiles: ListBuffer[File]): Int = {
     var unpacked = 0
     val outputPath = dir.toPath
-//    if (this.files.isEmpty){
-//      throw new IllegalStateException("Nie wybrano plików.")
-//    }
     using(new ZipFile(file)) { packedFile =>
       if (packedFile != null) {
         for (f <- packedFile.entries.asScala) {

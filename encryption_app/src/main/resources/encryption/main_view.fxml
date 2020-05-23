@@ -22,7 +22,7 @@
           </Menu>
         </menus>
       </MenuBar>
-      <HBox>
+      <HBox onKeyPressed="#buttonDeleteSelectedFilesOnKeyPress">
          <children>
             <Pane prefHeight="458.0" prefWidth="266.0">
                <children>
@@ -87,7 +87,6 @@
                        <Button alignment="CENTER" mnemonicParsing="false" onAction="#buttonSelectFilesOnClick" text="Wybierz pliki" ButtonBar.buttonData="LEFT" />
                         <Button alignment="CENTER" mnemonicParsing="false" onAction="#buttonDeleteSelectedFilesOnClick" text="Usuń zaznaczone" ButtonBar.buttonData="RIGHT" />
                         <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#buttonCleanFilesOnClick" text="Usuń wszystkie" ButtonBar.buttonData="RIGHT" />
-<!--                        <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#buttonUnpackFilesOnClick" text="Wypakuj" ButtonBar.buttonData="RIGHT" />-->
                     </buttons>
                      <VBox.margin>
                         <Insets left="5.0" right="5.0" />
