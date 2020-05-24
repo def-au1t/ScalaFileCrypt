@@ -37,21 +37,21 @@ object FileUtils {
   @throws[CryptoException]
   private def doCrypt(cipherMode: Int, password: String, inputFile: File, outputFile: File, algorithm: String,
                       secretKeyAlgorithm: String): Unit = {
+    var inputStream  = None: Option[FileInputStream]
+    var outputStream  = None: Option[FileOutputStream]
     try {
       val digest = MessageDigest.getInstance("SHA-256")
       val encodedHash = digest.digest(password.getBytes(StandardCharsets.UTF_8)).slice(0, 16)
       val secretKey = new SecretKeySpec(encodedHash, algorithm)
       val cipher = Cipher.getInstance(secretKeyAlgorithm)
-
-      val inputStream = new FileInputStream(inputFile)
-      val outputStream = new FileOutputStream(outputFile, false)
-
       var inputBytes = new Array[Byte](inputFile.length.asInstanceOf[Int])
+
+      inputStream = Some(new FileInputStream(inputFile))
       var controlSum = new Array[Byte](16)
 
       cipher.init(cipherMode, secretKey)
 
-      inputStream.read(inputBytes)
+      inputStream.get.read(inputBytes)
 
       if(cipherMode == Cipher.DECRYPT_MODE) {
         controlSum = inputBytes.slice(inputBytes.length-16, inputBytes.length)
@@ -64,13 +64,11 @@ object FileUtils {
         outputBytes = outputBytes ++ computeControlSum(inputFile)
       }
 
-      outputStream.write(outputBytes)
+      outputStream = Some(new FileOutputStream(outputFile, false))
+      outputStream.get.write(outputBytes)
 
-      inputStream.close()
-      outputStream.close()
 
-      if(cipherMode == Cipher.DECRYPT_MODE &&
-        controlSum.map("%02x".format(_)).mkString != computeControlSum(outputFile).map("%02x".format(_)).mkString) {
+      if(cipherMode == Cipher.DECRYPT_MODE && !controlSum.diff(computeControlSum(outputFile)).isEmpty) {
         outputFile.delete()
         throw new Exception("Sumy kontrolne się nie zgadzają")
       }
@@ -81,12 +79,16 @@ object FileUtils {
       case ex@(_: NoSuchPaddingException | _: NoSuchAlgorithmException | _: IllegalBlockSizeException | _: IOException) =>
         throw new Exception("Error encrypting/decrypting file", ex)
     }
+    finally{
+      if (inputStream.isDefined) inputStream.get.close()
+      if (outputStream.isDefined) outputStream.get.close()
+    }
   }
 }
 
 
 class CryptoException() extends Exception {
-  def this(message: String, throwable: Throwable) = {
+  def this(message: String, throwable: Throwable) {
     this()
   }
 }
