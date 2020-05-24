@@ -47,7 +47,7 @@ class Controller(){
     this.showAlert(AlertType.Information,
       "O Aplikacji ",
       "Aplikacja powstała w ramach projektu z przedmiotu:\nProgramowanie w języku Scala",
-      "Wersja: 0.1\n\nAutorzy: \n- Kamil Koczera\n- Jacek Nitychoruk")
+      "Wersja: 1.0\n\nAutorzy: \n- Kamil Koczera\n- Jacek Nitychoruk")
   }
 
   @FXML
