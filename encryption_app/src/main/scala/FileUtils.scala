@@ -1,5 +1,4 @@
 import java.io.File
-
 import javax.crypto.BadPaddingException
 import javax.crypto.Cipher
 import javax.crypto.IllegalBlockSizeException
@@ -12,7 +11,6 @@ import java.security.{DigestInputStream, InvalidKeyException, Key, MessageDigest
 import java.nio.charset.StandardCharsets
 
 object CryptoUtils {
-
 
   def getSecretKeyAlgorithm(encryption: String) : String =  encryption match {
       case "AES" => "AES"

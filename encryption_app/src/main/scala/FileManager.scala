@@ -1,13 +1,9 @@
-import java.nio.file.{Files, NoSuchFileException, Path, Paths, StandardCopyOption}
+import java.nio.file.{Files, StandardCopyOption}
 import java.security.InvalidKeyException
-import java.io.{BufferedInputStream, BufferedReader, File, FileInputStream, FileOutputStream, InputStream}
-
+import java.io.File
 import scala.collection.mutable.ListBuffer
-import java.util.zip.{ZipEntry, ZipException, ZipFile, ZipInputStream, ZipOutputStream}
-import java.io.{FileOutputStream, InputStream}
-
-import sun.security.util.Password
-
+import java.util.zip.{ZipEntry, ZipFile, ZipOutputStream}
+import java.io.FileOutputStream
 import scala.jdk.CollectionConverters._
 import java.io.BufferedInputStream
 import java.io.DataInputStream
@@ -60,7 +56,7 @@ class FileManager(controller: Controller) {
     var decryptedFiles = ListBuffer.empty[File]
     for (file <- this.files) {
       breakable {
-        var name = selectedDirectory.toString + "\\" + file.getName.substring(0, file.getName.length - 4);
+        val name = selectedDirectory.toString + "\\" + file.getName.substring(0, file.getName.length - 4);
         var output = new File(name)
         try {
           if(!file.canRead) throw new Exception("Nie można odczytać pliku " + file.getAbsolutePath)
@@ -93,7 +89,7 @@ class FileManager(controller: Controller) {
       }
     }
     this.files = decryptedFiles.toVector
-    return numberDecrypted
+    numberDecrypted
   }
 
   def compressFiles(f: File, password: String): Int = {
@@ -169,7 +165,7 @@ class FileManager(controller: Controller) {
     if (result != this.allAreEncrypted){
       this.allAreEncrypted = result;
     }
-    return result
+    result
   }
 
 
@@ -188,7 +184,7 @@ class FileManager(controller: Controller) {
     this.onFilesChange()
   }
 
-  def onFilesChange() = {
+  def onFilesChange(): Unit = {
     this.controller.setButtonStatus()
     this.controller.updateFileListView()
   }

@@ -1,14 +1,10 @@
 import java.io.File
-import java.net.URL
 import java.security.InvalidKeyException
-
-import javafx.beans.value.ChangeListener
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.control.{Button, ChoiceBox, ListView, PasswordField, SelectionMode}
 import javafx.scene.input.{DragEvent, Dragboard, KeyCode, KeyEvent}
 import javafx.stage.DirectoryChooser
-//import javax.annotation.Resources
 import scalafx.stage.FileChooser
 import scalafx.stage.Stage
 import scalafx.scene.control.{Alert, ButtonType}
@@ -16,7 +12,7 @@ import scalafx.scene.control.Alert.AlertType
 import scalafx.scene.input.TransferMode
 
 import scala.jdk.javaapi.CollectionConverters
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import scala.collection.mutable.ArrayBuffer
 
 class Controller(){
 
@@ -89,7 +85,7 @@ class Controller(){
       "Zakończono pomyślnie szyfrowanie plików",
       "Zaszyfrowano pomyślnie: " + encrypted + "\\" + this.fileManager.numberOfFiles)
     this.passwordField.setText("")
-    this.fileManager.onFilesChange
+    this.fileManager.onFilesChange()
   }
 
   @FXML
@@ -123,7 +119,7 @@ class Controller(){
         }
 
         this.passwordField.setText("")
-        this.fileManager.onFilesChange
+        this.fileManager.onFilesChange()
       }
     } catch{
       case ex: IllegalStateException => {
@@ -155,11 +151,11 @@ class Controller(){
     var compressed = 0
     val allFiles = this.fileManager.numberOfFiles()
     try {
-      if(allFiles == 0) {
-        throw new IllegalStateException("Nie wybrano plików")
-      }
       if(passwordField.getText.length < 3) {
         throw new InvalidKeyException("Hasło musi mieć przynajmniej 3 znaki")
+      }
+      if(allFiles == 0) {
+        throw new IllegalStateException("Nie wybrano plików")
       }
       val stage = new Stage()
       val fileChooser = new FileChooser()
@@ -294,5 +290,4 @@ class Controller(){
     this.buttonEncrypt.setDisable(res)
     this.buttonCompressAndEncrypt.setDisable(this.fileManager.files.isEmpty)
   }
-
 }
