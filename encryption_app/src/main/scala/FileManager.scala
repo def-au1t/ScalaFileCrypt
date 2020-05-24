@@ -1,21 +1,13 @@
-import java.nio.file.{Files, NoSuchFileException, Path, Paths, StandardCopyOption}
+import java.nio.file.{Files, StandardCopyOption}
 import java.security.InvalidKeyException
-import java.io.{BufferedInputStream, BufferedReader, File, FileInputStream, FileOutputStream, InputStream}
+import java.io.{File, BufferedInputStream, FileOutputStream, DataInputStream, FileInputStream, IOException}
+import java.util.zip.{ZipEntry, ZipFile, ZipOutputStream}
 
 import scala.collection.mutable.ListBuffer
-import java.util.zip.{ZipEntry, ZipException, ZipFile, ZipInputStream, ZipOutputStream}
-import java.io.{FileOutputStream, InputStream}
-
-import sun.security.util.Password
-
-import scala.jdk.CollectionConverters._
-import java.io.BufferedInputStream
-import java.io.DataInputStream
-import java.io.FileInputStream
-import java.io.IOException
-import util.control.Breaks._
-
 import scalafx.scene.control.Alert.AlertType
+import scala.jdk.CollectionConverters._
+
+import util.control.Breaks._
 
 
 class FileManager(controller: Controller) {
@@ -43,7 +35,7 @@ class FileManager(controller: Controller) {
       if(compressed != -1) {
         output = new File(file.toString)
       }
-      CryptoUtils.encrypt(password, file, output, this.EncryptionAlgorithm)
+      FileUtils.encrypt(password, file, output, this.EncryptionAlgorithm)
       encryptedFiles += output
       numberEncrypted += 1
     }
@@ -60,26 +52,24 @@ class FileManager(controller: Controller) {
     var decryptedFiles = ListBuffer.empty[File]
     for (file <- this.files) {
       breakable {
-        var name = selectedDirectory.toString + "\\" + file.getName.substring(0, file.getName.length - 4);
+        val name = selectedDirectory.toString + "\\" + file.getName.substring(0, file.getName.length - 4)
         var output = new File(name)
         try {
           if(!file.canRead) throw new Exception("Nie można odczytać pliku " + file.getAbsolutePath)
-          CryptoUtils.decrypt(password, file, output, this.EncryptionAlgorithm)
+          FileUtils.decrypt(password, file, output, this.EncryptionAlgorithm)
         }
         catch {
-          case ex: InvalidKeyException => {
+          case ex: InvalidKeyException =>
             this.controller.showAlert(AlertType.Error,
               "Nieprawidłowe hasło",
               header = ex.getMessage
             )
             break
-          }
-          case ex: Exception => {
+          case ex: Exception =>
             this.controller.showAlert(AlertType.Error,
               "Nieoczekiwany błąd",
               header = ex.getMessage
             )
-          }
         }
         if(output.canRead) {
           if (this.isZipFile(output)) {
@@ -93,7 +83,7 @@ class FileManager(controller: Controller) {
       }
     }
     this.files = decryptedFiles.toVector
-    return numberDecrypted
+    numberDecrypted
   }
 
   def compressFiles(f: File, password: String): Int = {
@@ -116,13 +106,11 @@ class FileManager(controller: Controller) {
     this.encryptFiles(password, compressed)
   }
 
-  def using[T <: {def close()}, U](resource: T)(block: T => U): U = {
-    try {
-      block(resource)
-    } finally {
-      if (resource != null) {
-        resource.close()
-      }
+  def using[T <: {def close()}, U](resource: T)(block: T => U): U = try {
+    block(resource)
+  } finally {
+    if (resource != null) {
+      resource.close()
     }
   }
 
@@ -167,9 +155,9 @@ class FileManager(controller: Controller) {
         result = false
     }
     if (result != this.allAreEncrypted){
-      this.allAreEncrypted = result;
+      this.allAreEncrypted = result
     }
-    return result
+    result
   }
 
 
@@ -188,7 +176,7 @@ class FileManager(controller: Controller) {
     this.onFilesChange()
   }
 
-  def onFilesChange() = {
+  def onFilesChange(): Unit = {
     this.controller.setButtonStatus()
     this.controller.updateFileListView()
   }
