@@ -163,6 +163,7 @@ class FileManager(controller: Controller) {
 
   def addFiles(files: Seq[File]): Unit = {
     this.files ++= files
+    this.files = this.files.distinctBy(_.getName)
     this.onFilesChange()
   }
 
