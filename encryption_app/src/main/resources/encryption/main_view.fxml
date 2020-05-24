@@ -4,6 +4,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
 <VBox xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
    <children>
       <MenuBar>
@@ -20,13 +22,13 @@
           </Menu>
         </menus>
       </MenuBar>
-      <HBox>
+      <HBox onKeyPressed="#buttonDeleteSelectedFilesOnKeyPress">
          <children>
             <Pane prefHeight="458.0" prefWidth="266.0">
                <children>
                   <VBox alignment="TOP_CENTER" prefHeight="496.0" prefWidth="266.0">
                      <children>
-                        <Label text="hasło:">
+                        <Label text="Hasło:">
                            <VBox.margin>
                               <Insets bottom="10.0" top="10.0" />
                            </VBox.margin>
@@ -53,6 +55,19 @@
                         </Button>
 
                         <Button fx:id="buttonCompressAndEncrypt" disable="true" mnemonicParsing="false" onAction="#buttonCompressFilesOnClick" text="Kompresuj i szyfruj" />
+                        <Label text="Algorytm szyfrowania:">
+                           <VBox.margin>
+                              <Insets bottom="5.0" top="15.0" />
+                           </VBox.margin>
+                        </Label>
+                         <ChoiceBox fx:id="choiceAlgorithm" value="AES" onAction="#choiceAlgorithmOnChange" prefWidth="150.0" >
+                             <items>
+                                 <FXCollections fx:factory="observableArrayList">
+                                     <String fx:value="AES" />
+                                     <String fx:value="Blowfish" />
+                                 </FXCollections>
+                             </items>
+                         </ChoiceBox>
                      </children>
                      <opaqueInsets>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -72,7 +87,6 @@
                        <Button alignment="CENTER" mnemonicParsing="false" onAction="#buttonSelectFilesOnClick" text="Wybierz pliki" ButtonBar.buttonData="LEFT" />
                         <Button alignment="CENTER" mnemonicParsing="false" onAction="#buttonDeleteSelectedFilesOnClick" text="Usuń zaznaczone" ButtonBar.buttonData="RIGHT" />
                         <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#buttonCleanFilesOnClick" text="Usuń wszystkie" ButtonBar.buttonData="RIGHT" />
-<!--                        <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#buttonUnpackFilesOnClick" text="Wypakuj" ButtonBar.buttonData="RIGHT" />-->
                     </buttons>
                      <VBox.margin>
                         <Insets left="5.0" right="5.0" />
