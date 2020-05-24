@@ -69,6 +69,7 @@ object FileUtils {
 
 
       if(cipherMode == Cipher.DECRYPT_MODE && !controlSum.diff(computeControlSum(outputFile)).isEmpty) {
+        outputStream.get.close()
         outputFile.delete()
         throw new Exception("Sumy kontrolne się nie zgadzają")
       }
