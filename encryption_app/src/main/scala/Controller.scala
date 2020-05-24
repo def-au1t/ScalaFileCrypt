@@ -1,12 +1,12 @@
 import java.io.File
 import java.security.InvalidKeyException
-import javafx.event.ActionEvent
+
 import javafx.fxml.FXML
 import javafx.scene.control.{Button, ChoiceBox, ListView, PasswordField, SelectionMode}
 import javafx.scene.input.{DragEvent, Dragboard, KeyCode, KeyEvent}
 import javafx.stage.DirectoryChooser
-import scalafx.stage.FileChooser
-import scalafx.stage.Stage
+
+import scalafx.stage.{FileChooser, Stage}
 import scalafx.scene.control.{Alert, ButtonType}
 import scalafx.scene.control.Alert.AlertType
 import scalafx.scene.input.TransferMode
@@ -21,10 +21,8 @@ class Controller(){
 
   @FXML
   var filesList: ListView[File] = _
-
   @FXML
   var passwordField: PasswordField = _
-
   @FXML
   var buttonDecrypt: Button = _
   @FXML
@@ -40,12 +38,12 @@ class Controller(){
   }
 
   @FXML
-  def menuFileCloseOnClick(event: ActionEvent): Unit = {
+  def menuFileCloseOnClick(): Unit = {
     System.exit(0)
   }
 
   @FXML
-  def menuHelpAboutOnClick(event: ActionEvent): Unit = {
+  def menuHelpAboutOnClick(): Unit = {
     this.showAlert(AlertType.Information,
       "O Aplikacji ",
       "Aplikacja powstała w ramach projektu z przedmiotu:\nProgramowanie w języku Scala",
@@ -53,32 +51,29 @@ class Controller(){
   }
 
   @FXML
-  def buttonEncryptOnClick(event: ActionEvent): Unit = {
+  def buttonEncryptOnClick(): Unit = {
     var encrypted = 0
     try {
       encrypted = this.fileManager.encryptFiles(passwordField.getText)
     } catch {
-      case ex: IllegalStateException =>{
+      case ex: IllegalStateException =>
         this.showAlert(AlertType.Error,
           "Wystąpił błąd",
           header=ex.getMessage
           )
         return
-      }
-      case ex: InvalidKeyException =>{
+      case ex: InvalidKeyException =>
         this.showAlert(AlertType.Error,
           "Nieprawidłowe hasło",
           header=ex.getMessage
         )
         return
-      }
-      case ex: Exception => {
+      case ex: Exception =>
         this.showAlert(AlertType.Error,
           "Nieoczekiwany błąd",
           header=ex.getMessage
         )
         return
-      }
     }
     this.showAlert(AlertType.Information,
       "Szyfrowanie zakończone",
@@ -122,32 +117,27 @@ class Controller(){
         this.fileManager.onFilesChange()
       }
     } catch{
-      case ex: IllegalStateException => {
+      case ex: IllegalStateException =>
         this.showAlert(AlertType.Error,
           "Wystąpił błąd",
           header=ex.getMessage
         )
-        return
-      }
-      case ex: InvalidKeyException => {
+      case ex: InvalidKeyException =>
         this.showAlert(AlertType.Error,
           "Hasło nie spełnia wymagań",
           header=ex.getMessage
         )
-        return
-      }
-      case ex: Exception => {
+      case ex: Exception =>
         this.showAlert(AlertType.Error,
           "Nieoczekiwany błąd",
           header = ex.getMessage
         )
-      }
     }
 
   }
 
   @FXML
-  def buttonCompressFilesOnClick(event: ActionEvent): Unit = {
+  def buttonCompressFilesOnClick(): Unit = {
     var compressed = 0
     val allFiles = this.fileManager.numberOfFiles()
     try {
@@ -173,27 +163,25 @@ class Controller(){
           "Skompresowano pomyślnie: " + compressed + "\\" + allFiles)
       }
     } catch {
-      case ex: IllegalStateException =>{
+      case ex: IllegalStateException =>
         this.showAlert(AlertType.Error,
           "Wystąpił błąd",
           header=ex.getMessage
         )
         return
-      }
-      case ex: Exception => {
+      case ex: Exception =>
         this.showAlert(AlertType.Error,
           "Nieoczekiwany błąd",
           header=ex.getMessage
         )
         return
-      }
     }
     this.passwordField.setText("")
     this.fileManager.onFilesChange()
   }
 
   @FXML
-  def buttonSelectFilesOnClick(event: ActionEvent): Unit = {
+  def buttonSelectFilesOnClick(): Unit = {
     val fileChooser = new FileChooser()
     fileChooser.setTitle("Wybierz pliki")
     val stage = new Stage()
@@ -211,7 +199,7 @@ class Controller(){
   }
 
   @FXML
-  def buttonDeleteSelectedFilesOnClick(event: ActionEvent): Unit = {
+  def buttonDeleteSelectedFilesOnClick(): Unit = {
     deleteSelectedFiles()
   }
 
@@ -223,12 +211,12 @@ class Controller(){
   }
 
   @FXML
-  def buttonCleanFilesOnClick(event: ActionEvent): Unit = {
+  def buttonCleanFilesOnClick(): Unit = {
     this.fileManager.clearFiles()
   }
 
   @FXML
-  def choiceAlgorithmOnChange(event: ActionEvent): Unit = {
+  def choiceAlgorithmOnChange(): Unit = {
     val algorithm = this.getAlgorithmString(this.choiceAlgorithm.getValue)
     this.fileManager.EncryptionAlgorithm = algorithm
   }
