@@ -26,3 +26,9 @@ class Main extends Application {
     primaryStage.show()
   }
 }
+
+object Launcher {
+  def main(args: Array[String]): Unit = {
+    Main.main(args)
+  }
+}

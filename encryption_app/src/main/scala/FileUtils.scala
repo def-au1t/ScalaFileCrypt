@@ -86,7 +86,7 @@ object FileUtils {
 
 
 class CryptoException() extends Exception {
-  def this(message: String, throwable: Throwable) {
+  def this(message: String, throwable: Throwable) = {
     this()
   }
 }
