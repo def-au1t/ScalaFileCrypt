@@ -1,4 +1,4 @@
-# ScalaFileCrypt
+# Scala Encryption Tool
 
 ## About app
 
@@ -6,9 +6,24 @@ Application to encrypt/decrypt files and pack files into encrypted archives. Cre
 
 ## Functionality
 
-Application allows the following things:
+Application contains the following features:
 
 - Encrypt multiple files using safe AES or Blowfish algorithm.
 - Create encrypted archive containing all files in compressed version.
 - Decrypt multiple files with control sum verification.
-- Files management
+- Easy - drag and drop - file management
+
+## Screenshots
+
+### Encryption view
+
+![1](img/1.png)
+
+### Successful decryption window
+
+![2](img/2.png)
+
+## Authors
+
+- [kuczi55](https://github.com/kuczi55)
+- [Jck-eN](https://github.com/Jck-eN)
